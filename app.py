@@ -14,8 +14,11 @@ load_dotenv()
 
 
 machine = TocMachine(
-    states=["user", "weapon_cate", "weapon_select", "weapon_details", "armor"],
-    transitions=[
+    states = [
+        "user", "weapon_cate", "weapon_select", "weapon_details",
+        "monster", "monster_size", "monster_info", "monster_finish"
+    ],
+    transitions = [
         {
             "trigger": "advance",
             "source": "user",
@@ -24,7 +27,10 @@ machine = TocMachine(
         },
         {
             "trigger": "advance",
-            "source": ["weapon_cate", "weapon_select"],
+            "source": [
+                "weapon_cate", "weapon_select", "monster",
+                "monster_size", "monster_info"
+            ],
             "dest": "user",
             "conditions": "is_going_back_previous",
         },
@@ -40,7 +46,31 @@ machine = TocMachine(
             "dest": "weapon_details",
             "conditions": "is_going_to_weapon_details",
         },
-        {"trigger": "go_back", "source": "weapon_details", "dest": "user"},
+        {
+            "trigger": "advance",
+            "source": "user",
+            "dest": "monster",
+            "conditions": "is_going_to_monster",
+        },
+        {
+            "trigger": "advance",
+            "source": "monster",
+            "dest": "monster_size",
+            "conditions": "is_going_to_monster_size",
+        },
+        {
+            "trigger": "advance",
+            "source": "monster_size",
+            "dest": "monster_info",
+            "conditions": "is_going_to_monster_info",
+        },
+        {
+            "trigger": "advance",
+            "source": "monster_info",
+            "dest": "monster_finish",
+            "conditions": "is_going_to_monster_finish",
+        },
+        {"trigger": "go_back", "source": ["weapon_details", "monster_finish"], "dest": "user"},
     ],
     initial="user",
     auto_transitions=False,
