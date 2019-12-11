@@ -30,7 +30,10 @@ machine = TocMachine(
         },
         {
             "trigger": "advance",
-            "source": "user",
+            "source": [
+                "user", "help", "weapon_cate", "weapon_select", "weapon_details",
+                "monster", "monster_size", "monster_info", "monster_finish"
+            ],
             "dest": "show_fsm",
             "conditions": "is_going_to_fsm",
         },

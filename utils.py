@@ -60,7 +60,8 @@ def get_image(img_url):
     return message
 
 def show_fsm_image(reply_token):
-    send_image(reply_token, "https://i.imgur.com/q59fXo1.png")
+    img_url = "https://i.imgur.com/q59fXo1.png"
+    send_image(reply_token, BOT_HOST_DOMAIN + "/show-fsm")
 
 weapon_list_url = [
     "great_swords", "long_sword", "sword_shield", "dual_blades",
