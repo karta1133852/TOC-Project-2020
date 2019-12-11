@@ -236,7 +236,7 @@ class TocMachine(GraphMachine):
         print("I'm entering monster_details")
         
         reply_token = event.reply_token
-        result = get_monster_info(current_url)
+        result_info = get_monster_info(current_url)
         
         after_details_action = [
             URITemplateAction(
@@ -252,12 +252,16 @@ class TocMachine(GraphMachine):
         
         line_bot_api = LineBotApi(channel_access_token)
         if monster_size == 0:
+            img_url = get_monster_img()
             message_btn_selector = get_templete_message_button("選擇", "請選擇詳細資料", "選擇詳細資料", monster_option_actions)
-            line_bot_api.reply_message(reply_token, [get_text_message(result), message_btn_selector, message_btn_more])
+            if img_url != "":
+                img_massage = get_image(img_url)
+                line_bot_api.reply_message(reply_token, [get_text_message(result_info), img_massage, message_btn_selector, message_btn_more])
+            else:
+                line_bot_api.reply_message(reply_token, [get_text_message(result_info), message_btn_selector, message_btn_more])
         else:
-            result2 = get_monster_details(1, 5)
-            line_bot_api.reply_message(reply_token, [get_text_message(result), get_text_message(result2), message_btn_more])
-            #send_text_message(reply_token, result)
+            result_material = get_monster_details(1, 5)
+            line_bot_api.reply_message(reply_token, [get_text_message(result_info), get_text_message(result_material), message_btn_more])
             self.go_back()
     
     def is_going_to_monster_finish(self, event):

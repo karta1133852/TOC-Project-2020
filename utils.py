@@ -43,6 +43,13 @@ def get_templete_message_button(title, text, alt_text, actions):
     )
     return message
 
+def get_image(img_url):
+    massage = ImageSendMessage(
+        original_content_url = img_url,
+        preview_image_url = img_url
+    )
+    return massage
+
 weapon_list_url = [
     "great_swords", "long_sword", "sword_shield", "dual_blades",
     "hammer", "hunting_horn", "lances", "gunlance",
@@ -84,6 +91,7 @@ def get_weapon_details(url):
     url = mhw_wiki_url + url
     r = requests.get(url)
     if r.status_code == requests.codes.ok:
+        global soup
         soup = BeautifulSoup(r.text, "html.parser")
         table = soup.find("table", {"class" : "simple-table"})
         td_tags = table.findAll("td")
@@ -99,6 +107,17 @@ def get_weapon_details(url):
         result += s
     
     return result
+
+# website no images
+"""def get_weapon_img():
+    img_url = ""
+    global soup
+    div = soup.find("div", {"class" : "siema"})
+    img = div.find("img")
+    if img is not None:
+        img_url += mhw_wiki_url + img.get("src")
+    
+    return img_url"""
 
 def check_monster_name(name, size): # size = 0:大型魔物 1:小型魔物
     
@@ -136,6 +155,16 @@ def get_monster_info(url):
     return result
 
 material_get_method = ["剝取及掉落物", "捕獲報酬", "自由狩獵"]
+
+def get_monster_img():
+    img_url = ""
+    global soup
+    div = soup.find("div", {"class" : "siema"})
+    img = div.find("img")
+    if img is not None:
+        img_url += mhw_wiki_url + img.get("src")
+    
+    return img_url
 
 def get_monster_details(size, type):
     result = ""
