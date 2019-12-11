@@ -10,7 +10,7 @@ jinja2==2.10.3
 line-bot-sdk==1.14.0
 markupsafe==1.1.1
 pygraphviz==1.5
-python-pygraphviz=1.4~rc1-1build2.1
+python-pygraphviz==1.4~rc1-1build2.1
 python-dotenv==0.10.3
 requests==2.22.0
 six==1.12.0
