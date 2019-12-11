@@ -57,11 +57,14 @@ soup = None
 def check_weapon_name(weapon_type, name):
     
     name = name.upper()
+    name = name.replace("III", "Ⅲ")
+    name = name.replace("II", "Ⅱ")
     name = name.replace("I", "Ⅰ")
     name = name.replace("[", "【")
     name = name.replace("]", "】")
-    name = name.replace("[", "［")
-    name = name.replace("]", "］")
+    name = name.replace("［", "【")
+    name = name.replace("］", "】")
+    
     r = requests.get(weapon_cate_url + weapon_list_url[weapon_type])
     if r.status_code == requests.codes.ok:
         soup = BeautifulSoup(r.text, "html.parser")

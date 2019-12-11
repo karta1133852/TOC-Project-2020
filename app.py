@@ -21,18 +21,18 @@ machine = TocMachine(
     transitions = [
         {
             "trigger": "advance",
-            "source": "user",
-            "dest": "weapon_cate",
-            "conditions": "is_going_to_weapon_cate",
+            "source": [
+                "weapon_cate", "weapon_select",
+                "monster", "monster_size", "monster_info"
+            ],
+            "dest": "user",
+            "conditions": "is_going_back_user",
         },
         {
             "trigger": "advance",
-            "source": [
-                "weapon_cate", "weapon_select", "monster",
-                "monster_size", "monster_info"
-            ],
-            "dest": "user",
-            "conditions": "is_going_back_previous",
+            "source": "user",
+            "dest": "weapon_cate",
+            "conditions": "is_going_to_weapon_cate",
         },
         {
             "trigger": "advance",
@@ -45,6 +45,12 @@ machine = TocMachine(
             "source": "weapon_select",
             "dest": "weapon_details",
             "conditions": "is_going_to_weapon_details",
+        },
+        {
+            "trigger": "advance",
+            "source": "user",
+            "dest": "weapon_details",
+            "conditions": "is_going_direct_weapon_details",
         },
         {
             "trigger": "advance",
@@ -63,6 +69,12 @@ machine = TocMachine(
             "source": "monster_size",
             "dest": "monster_info",
             "conditions": "is_going_to_monster_info",
+        },
+        {
+            "trigger": "advance",
+            "source": "user",
+            "dest": "monster_info",
+            "conditions": "is_going_direct_monster_info",
         },
         {
             "trigger": "advance",

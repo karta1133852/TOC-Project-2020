@@ -1,5 +1,4 @@
 from transitions.extensions import GraphMachine
-
 from linebot import LineBotApi, WebhookParser
 from utils import *
 
@@ -42,13 +41,24 @@ monster_option_actions = [
         )
     ]
 
+def is_weapon_type(weapon_type):
+    result = False
+    global weapon_list
+    for s in weapon_list:
+        if s == weapon_type:
+            result = True;
+            global weapon_select_type
+            weapon_select_type = weapon_list.index(s)
+            break
+    return result
+
 class TocMachine(GraphMachine):
     
     def __init__(self, **machine_configs):
         self.machine = GraphMachine(model=self, **machine_configs)
 
     def is_going_to_weapon_cate(self, event):
-        text = event.message.text
+        text = event.message.text.strip()
         return text.lower() == "武器"
     
     def on_enter_weapon_cate(self, event):
@@ -57,23 +67,26 @@ class TocMachine(GraphMachine):
         reply_token = event.reply_token
         send_text_message(reply_token, "請輸入武器類別")
     
-    def is_going_back_previous(self, event):
-        text = event.message.text
+    def is_going_back_user(self, event):
+        text = event.message.text.strip()
         if text.lower() == "返回":
             reply_token = event.reply_token
-            send_text_message(reply_token, "請選擇功能")
-            # TODO template
+            actions = [
+                MessageTemplateAction(
+                    label = "武器",
+                    text = "武器"
+                ),
+                MessageTemplateAction(
+                    label = "魔物",
+                    text = "魔物"
+                )
+            ]
+            send_templete_message_button(reply_token, "主畫面", "請選擇功能", actions)
             return True
-    
+  
     def is_going_to_weapon_select(self, event):
-        text = event.message.text
-        result = False
-        global weapon_list
-        for s in weapon_list:
-            if s == text.lower():
-                result = True;
-                global weapon_select_type
-                weapon_select_type = weapon_list.index(s)
+        text = event.message.text.strip()
+        result = is_weapon_type(text)
         return result
 
     def on_enter_weapon_select(self, event):
@@ -83,7 +96,7 @@ class TocMachine(GraphMachine):
         send_text_message(reply_token, "請輸入 " + weapon_list[weapon_select_type] + " 的名稱(可用'[]'代替'【】')：")
     
     def is_going_to_weapon_details(self, event):
-        text = event.message.text
+        text = event.message.text.strip()
         global current_url
         current_url = check_weapon_name(weapon_select_type, text)
         if current_url == "":
@@ -92,7 +105,20 @@ class TocMachine(GraphMachine):
             return False
         else:
             return True
-        
+    
+    def is_going_direct_weapon_details(self, event):
+        result = False
+        text = event.message.text.strip()
+        slices = text.split()
+        if slices[0] == "武器" and is_weapon_type(slices[1]):
+            global current_url
+            current_url = check_weapon_name(weapon_select_type, slices[2])
+            if current_url != "":
+                return True
+        reply_token = event.reply_token
+        send_text_message(reply_token, "輸入錯誤，請重新輸入！")
+        return False
+    
     def on_enter_weapon_details(self, event):
         print("I'm entering weapon_details")
         
@@ -103,7 +129,7 @@ class TocMachine(GraphMachine):
         self.go_back()
     
     def is_going_to_monster(self, event):
-        text = event.message.text
+        text = event.message.text.strip()
         return text.lower() == "魔物"
         
     def on_enter_monster(self, event):
@@ -123,7 +149,7 @@ class TocMachine(GraphMachine):
         send_templete_message_button(reply_token, "選擇", "請選擇類別", actions)
     
     def is_going_to_monster_size(self, event):
-        text = event.message.text
+        text = event.message.text.strip()
         if text.lower() == "大型":
             monster_size = 0
             return True
@@ -139,10 +165,10 @@ class TocMachine(GraphMachine):
         if monster_size == 0:
             send_text_message(reply_token, "請輸入大型魔物名稱：")
         else:
-            send_text_message(reply_token, "請輸入小型魔物名稱：")
+            send_text_message(reply_token, "請輸入小型魔物名稱：")  
     
     def is_going_to_monster_info(self, event):
-        text = event.message.text
+        text = event.message.text.strip()
         global current_url
         current_url = check_monster_name(text, monster_size)
         if current_url == "":
@@ -151,6 +177,19 @@ class TocMachine(GraphMachine):
             return False
         else:
             return True
+    
+    def is_going_direct_monster_info(self, event):
+        result = False
+        text = event.message.text.strip()
+        slices = text.split()
+        if slices[0] == "魔物" and (slices[1] == "大型" or slices[1] == "小型"):
+            global current_url
+            current_url = check_monster_name(slices[2], slices[1])
+            if current_url != "":
+                return True
+        reply_token = event.reply_token
+        send_text_message(reply_token, "輸入錯誤，請重新輸入！")
+        return False
     
     def on_enter_monster_info(self, event):
         print("I'm entering monster_details")
@@ -161,7 +200,7 @@ class TocMachine(GraphMachine):
         line_bot_api.reply_message(reply_token, [get_text_message(result), get_templete_message_button("選擇", "請選擇詳細資料", monster_option_actions)])
     
     def is_going_to_monster_finish(self, event):
-        text = event.message.text
+        text = event.message.text.strip()
         if text == "返回":
             return True
         else:
