@@ -2,10 +2,7 @@ from transitions.extensions import GraphMachine
 
 from utils import send_text_message
 
-
-class TocMachine(GraphMachine):
-  
-    weapon_list = [
+weapon_list = [
         "大劍", "太刀", "片手劍", "雙劍",
         "大錘", "狩獵笛", "長槍", "銃槍",
         "斬擊斧", "操蟲棍", "充能斧", "輕弩", "重弩", "弓"
@@ -20,6 +17,9 @@ class TocMachine(GraphMachine):
     weapon_url = "https://www.mhchinese.wiki/weapons/c/"
     
     weapon_select_type = 0
+
+
+class TocMachine(GraphMachine):
     
     def __init__(self, **machine_configs):
         self.machine = GraphMachine(model=self, **machine_configs)
