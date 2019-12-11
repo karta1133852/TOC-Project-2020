@@ -29,6 +29,15 @@ def send_templete_message_button(reply_token, title, text, actions):
     line_bot_api.reply_message(reply_token, message)
     return "OK"
 
+def send_image(reply_token, img_url):
+    line_bot_api = LineBotApi(channel_access_token)
+    message = ImageSendMessage(
+        original_content_url = img_url,
+        preview_image_url = img_url
+    )
+    line_bot_api.reply_message(reply_token, message)
+    return "OK"
+
 def get_text_message(text):
     return TextSendMessage(text = text)
     
@@ -44,11 +53,14 @@ def get_templete_message_button(title, text, alt_text, actions):
     return message
 
 def get_image(img_url):
-    massage = ImageSendMessage(
+    message = ImageSendMessage(
         original_content_url = img_url,
         preview_image_url = img_url
     )
-    return massage
+    return message
+
+def show_fsm_image(reply_token):
+    send_image(reply_token, "https://i.imgur.com/q59fXo1.png")
 
 weapon_list_url = [
     "great_swords", "long_sword", "sword_shield", "dual_blades",

@@ -59,7 +59,7 @@ class TocMachine(GraphMachine):
 
     def is_going_to_weapon_cate(self, event):
         text = event.message.text.strip()
-        return text.lower() == "武器"
+        return text == "武器"
     
     def on_enter_weapon_cate(self, event):
         print("I'm entering weapon_cate")
@@ -69,7 +69,7 @@ class TocMachine(GraphMachine):
     
     def is_going_back_user(self, event):
         text = event.message.text.strip()
-        if text.lower() == "返回":
+        if text == "返回":
             reply_token = event.reply_token
             actions = [
                 MessageTemplateAction(
@@ -84,6 +84,17 @@ class TocMachine(GraphMachine):
             send_templete_message_button(reply_token, "主畫面", "請選擇功能", actions)
             return True
     
+    def is_going_to_fsm(self, event):
+        text = event.message.text.strip()
+        return text.upper() == "FSM"
+    
+    def on_enter_show_fsm(self, event):
+        print("I'm entering fsm")
+        
+        reply_token = event.reply_token
+        show_fsm_image(reply_token)
+        self.go_back()
+    
     def is_going_to_help(self, event):
         text = event.message.text.strip()
         return text == "幫助" or text == "指令"
@@ -95,8 +106,9 @@ class TocMachine(GraphMachine):
         help_text += "幫助/指令： 取得指令列表\n"
         help_text += "武器 [種類] [名稱]： 獲得該武器之資料\n"
         help_text += "魔物 [大型/小型] [名稱]： 獲得該魔物之資料\n"
-        help_text += "返回： 回到主畫面\n\n\n"
-        help_text += "版本： v0.0.1\n"
+        help_text += "返回： 回到主畫面\n"
+        help_text += "FSM： 顯示FSM狀態圖\n\n\n"
+        help_text += "版本： v0.0.2\n"
         help_text += "防具/裝飾品內容開發中..."
         reply_token = event.reply_token
         send_text_message(reply_token, help_text)
@@ -162,7 +174,7 @@ class TocMachine(GraphMachine):
     
     def is_going_to_monster(self, event):
         text = event.message.text.strip()
-        return text.lower() == "魔物"
+        return text == "魔物"
         
     def on_enter_monster(self, event):
         print("I'm entering monster")
@@ -183,10 +195,10 @@ class TocMachine(GraphMachine):
     def is_going_to_monster_size(self, event):
         text = event.message.text.strip()
         global monster_size
-        if text.lower() == "大型":
+        if text == "大型":
             monster_size = 0
             return True
-        elif text.lower() == "小型":
+        elif text == "小型":
             monster_size = 1
             return True
         return False
