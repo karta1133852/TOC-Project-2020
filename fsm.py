@@ -40,7 +40,8 @@ class TocMachine(GraphMachine):
 
     def is_going_to_weapon_select(self, event):
         text = event.message.text
-        result = True
+        result = False
+        global weapon_list
         for i in weapon_list:
             if weapon_list[i] == text.lower():
                 result = True;
@@ -49,7 +50,7 @@ class TocMachine(GraphMachine):
         return result
 
     def on_enter_weapon_select(self, event):
-        print("I'm entering state2")
+        print("I'm entering weapon_select")
 
         reply_token = event.reply_token
         send_text_message(reply_token, "請輸入" + weapon_list[weapon_select_type] + "名稱(可用'[]'代替'【】')")
