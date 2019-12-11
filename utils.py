@@ -60,7 +60,7 @@ def get_image(img_url):
     return message
 
 def show_fsm_image(reply_token):
-    img_url = "https://i.imgur.com/q59fXo1.png"
+    img_url = "https://i.imgur.com/UMF1uRi.png"
     domain = os.getenv("BOT_HOST_DOMAIN", None)
     send_image(reply_token, img_url)
 
