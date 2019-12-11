@@ -14,13 +14,19 @@ load_dotenv()
 
 
 machine = TocMachine(
-    states=["user", "state1", "state2"],
+    states=["user", "weapon_cate", "weapon_select", "weapon_details", "armor"],
     transitions=[
         {
             "trigger": "advance",
             "source": "user",
-            "dest": "state1",
-            "conditions": "is_going_to_state1",
+            "dest": "weapon_cate",
+            "conditions": "is_going_to_weapon_cate",
+        },
+        {
+            "trigger": "advance",
+            "source": "weapon_cate",
+            "dest": "weapon_select",
+            "conditions": "is_going_to_weapon_select",
         },
         {
             "trigger": "advance",
@@ -118,3 +124,4 @@ def show_fsm():
 if __name__ == "__main__":
     port = os.environ.get("PORT", 8000)
     app.run(host="0.0.0.0", port=port, debug=True)
+
