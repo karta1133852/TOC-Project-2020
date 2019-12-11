@@ -15,7 +15,7 @@ load_dotenv()
 
 machine = TocMachine(
     states = [
-        "user", "weapon_cate", "weapon_select", "weapon_details",
+        "user", "help", "weapon_cate", "weapon_select", "weapon_details",
         "monster", "monster_size", "monster_info", "monster_finish"
     ],
     transitions = [
@@ -27,6 +27,15 @@ machine = TocMachine(
             ],
             "dest": "user",
             "conditions": "is_going_back_user",
+        },
+        {
+            "trigger": "advance",
+            "source": [
+                "user", "weapon_cate", "weapon_select", "weapon_details",
+                "monster", "monster_size", "monster_info", "monster_finish"
+            ],
+            "dest": "help",
+            "conditions": "is_going_to_help",
         },
         {
             "trigger": "advance",
@@ -82,7 +91,13 @@ machine = TocMachine(
             "dest": "monster_finish",
             "conditions": "is_going_to_monster_finish",
         },
-        {"trigger": "go_back", "source": ["weapon_details", "monster_finish"], "dest": "user"},
+        {
+            "trigger": "go_back",
+            "source": [
+                "weapon_details", "monster_info", "monster_finish", "help"
+            ],
+            "dest": "user"
+        }
     ],
     initial="user",
     auto_transitions=False,

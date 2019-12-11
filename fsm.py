@@ -23,23 +23,23 @@ current_url = ""
 monster_size = 0
 
 monster_option_actions = [
-        MessageTemplateAction(
-            label = "弱點/肉質",
-            text = "弱點"
-        ),
-        MessageTemplateAction(
-            label = "特徵",
-            text = "特徵"
-        ),
-        MessageTemplateAction(
-            label = "素材",
-            text = "素材"
-        ),
-        MessageTemplateAction(
-            label = "返回",
-            text = "返回"
-        )
-    ]
+    MessageTemplateAction(
+        label = "弱點/肉質",
+        text = "弱點"
+    ),
+    MessageTemplateAction(
+        label = "特徵",
+        text = "特徵"
+    ),
+    MessageTemplateAction(
+        label = "素材",
+        text = "素材"
+    ),
+    MessageTemplateAction(
+        label = "返回",
+        text = "返回"
+    )
+]
 
 def is_weapon_type(weapon_type):
     result = False
@@ -83,7 +83,26 @@ class TocMachine(GraphMachine):
             ]
             send_templete_message_button(reply_token, "主畫面", "請選擇功能", actions)
             return True
-  
+    
+    def is_going_to_help(self, event):
+        text = event.message.text.strip()
+        return text == "幫助" or text == "指令"
+
+    def on_enter_help(self, event):
+        print("I'm entering help")
+        
+        help_text = ""
+        help_text += "幫助/指令： 取得指令列表\n"
+        help_text += "武器 [種類] [名稱]： 獲得該武器之資料\n"
+        help_text += "魔物 [大型/小型] [名稱]： 獲得該魔物之資料\n"
+        help_text += "返回： 回到主畫面\n\n\n"
+        help_text += "版本： v0.0.1\n"
+        help_text += "防具/裝飾品內容開發中..."
+        reply_token = event.reply_token
+        send_text_message(reply_token, help_text)
+        
+        self.go_back()
+    
     def is_going_to_weapon_select(self, event):
         text = event.message.text.strip()
         result = is_weapon_type(text)
@@ -93,7 +112,7 @@ class TocMachine(GraphMachine):
         print("I'm entering weapon_select")
 
         reply_token = event.reply_token
-        send_text_message(reply_token, "請輸入 " + weapon_list[weapon_select_type] + " 的名稱(可用'[]'代替'【】')：")
+        send_text_message(reply_token, "請輸入 " + weapon_list[weapon_select_type] + " 的名稱\n(可用'[]'代替'【】')：")
     
     def is_going_to_weapon_details(self, event):
         text = event.message.text.strip()
@@ -108,15 +127,19 @@ class TocMachine(GraphMachine):
     
     def is_going_direct_weapon_details(self, event):
         result = False
-        text = event.message.text.strip()
-        slices = text.split()
-        if slices[0] == "武器" and is_weapon_type(slices[1]):
-            global current_url
-            current_url = check_weapon_name(weapon_select_type, slices[2])
-            if current_url != "":
-                return True
         reply_token = event.reply_token
-        send_text_message(reply_token, "輸入錯誤，請重新輸入！")
+        text = event.message.text.strip()
+        if (text == "返回"):
+            send_text_message(reply_token, "已在主畫面")
+            return False
+        slices = text.split()
+        if slices[0] == "武器":
+            if is_weapon_type(slices[1]):
+                global current_url
+                current_url = check_weapon_name(weapon_select_type, slices[2])
+                if current_url != "":
+                    return True
+            send_text_message(reply_token, "輸入錯誤，請重新輸入！")
         return False
     
     def on_enter_weapon_details(self, event):
@@ -124,7 +147,16 @@ class TocMachine(GraphMachine):
         
         result = get_weapon_details(current_url)
         reply_token = event.reply_token
-        send_text_message(reply_token, result)
+        
+        after_details_action = [
+            URITemplateAction(
+                label = "顯示完整資料(開啟瀏覽器)",
+                uri = mhw_wiki_url + current_url
+            )
+        ]
+        message_btn_more = get_templete_message_button("繼續...", "需要更詳細的資訊嗎？", "選擇資訊", after_details_action)
+        line_bot_api = LineBotApi(channel_access_token)
+        line_bot_api.reply_message(reply_token, [get_text_message(result), message_btn_more])
         
         self.go_back()
     
@@ -150,6 +182,7 @@ class TocMachine(GraphMachine):
     
     def is_going_to_monster_size(self, event):
         text = event.message.text.strip()
+        global monster_size
         if text.lower() == "大型":
             monster_size = 0
             return True
@@ -180,15 +213,23 @@ class TocMachine(GraphMachine):
     
     def is_going_direct_monster_info(self, event):
         result = False
-        text = event.message.text.strip()
-        slices = text.split()
-        if slices[0] == "魔物" and (slices[1] == "大型" or slices[1] == "小型"):
-            global current_url
-            current_url = check_monster_name(slices[2], slices[1])
-            if current_url != "":
-                return True
         reply_token = event.reply_token
-        send_text_message(reply_token, "輸入錯誤，請重新輸入！")
+        text = event.message.text.strip()
+        if (text == "返回"):
+            send_text_message(reply_token, "已在主畫面")
+            return False
+        slices = text.split()
+        if slices[0] == "魔物":
+            if slices[1] == "大型" or slices[1] == "小型":
+                global current_url, monster_size
+                monster_size = 0
+                if slices[1] == "小型":
+                    monster_size = 1
+                current_url = check_monster_name(slices[2], monster_size)
+                if current_url != "":
+                    return True
+            send_text_message(reply_token, "輸入錯誤，請重新輸入！")
+        
         return False
     
     def on_enter_monster_info(self, event):
@@ -196,8 +237,28 @@ class TocMachine(GraphMachine):
         
         reply_token = event.reply_token
         result = get_monster_info(current_url)
+        
+        after_details_action = [
+            URITemplateAction(
+                label = "顯示完整資料(開啟瀏覽器)",
+                uri = mhw_wiki_url + current_url
+            ),
+            MessageTemplateAction(
+                label = "繼續查詢",
+                text = "返回"
+            )
+        ]
+        message_btn_more = get_templete_message_button("繼續...", "需要更詳細的資訊嗎？", "選擇資訊", after_details_action)
+        
         line_bot_api = LineBotApi(channel_access_token)
-        line_bot_api.reply_message(reply_token, [get_text_message(result), get_templete_message_button("選擇", "請選擇詳細資料", monster_option_actions)])
+        if monster_size == 0:
+            message_btn_selector = get_templete_message_button("選擇", "請選擇詳細資料", "選擇詳細資料", monster_option_actions)
+            line_bot_api.reply_message(reply_token, [get_text_message(result), message_btn_selector, message_btn_more])
+        else:
+            result2 = get_monster_details(1, 5)
+            line_bot_api.reply_message(reply_token, [get_text_message(result), get_text_message(result2), message_btn_more])
+            #send_text_message(reply_token, result)
+            self.go_back()
     
     def is_going_to_monster_finish(self, event):
         text = event.message.text.strip()
@@ -212,9 +273,9 @@ class TocMachine(GraphMachine):
                 details_type = 4
             elif text == "素材":
                 details_type = 5
-            result = get_monster_details(details_type)
+            result = get_monster_details(0, details_type)
             line_bot_api = LineBotApi(channel_access_token)
-            line_bot_api.reply_message(reply_token, [get_text_message(result), get_templete_message_button("選擇", "請選擇詳細資料", monster_option_actions)])
+            line_bot_api.reply_message(reply_token, [get_text_message(result), get_templete_message_button("選擇", "請選擇詳細資料", "選擇詳細資料", monster_option_actions)])
             return False
         
     def on_enter_monster_finish(self, event):

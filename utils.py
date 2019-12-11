@@ -30,15 +30,15 @@ def send_templete_message_button(reply_token, title, text, actions):
     return "OK"
 
 def get_text_message(text):
-    return TextSendMessage(text=text)
+    return TextSendMessage(text = text)
     
-def get_templete_message_button(title, text, actions):
+def get_templete_message_button(title, text, alt_text, actions):
     message = TemplateSendMessage(
-        alt_text="Buttons template",
-        template=ButtonsTemplate(
-            title=title,
-            text=text,
-            actions=actions
+        alt_text = alt_text,
+        template = ButtonsTemplate(
+            title = title,
+            text = text,
+            actions = actions
         )
     )
     return message
@@ -91,8 +91,12 @@ def get_weapon_details(url):
         result += "\n稀有度：Rare " + td_tags[1].string
         result += "\n攻擊：" + td_tags[3].string
         result += "\n屬性："
+        s = ""
         for span in td_tags[6].findAll("span"):
-            result += span.string + " "
+            s += span.string + " "
+        if s == "":
+            s += "無"
+        result += s
     
     return result
 
@@ -131,9 +135,38 @@ def get_monster_info(url):
         """
     return result
 
-def get_monster_details(type):
+material_get_method = ["剝取及掉落物", "捕獲報酬", "自由狩獵"]
+
+def get_monster_details(size, type):
     result = ""
+    global soup
     
+    if type == 5:
+        result += "素材：\n"
+        table_tags = soup.findAll("table", {"class" : "simple-table"})
+        for j in range(5, 8):
+            tr = table_tags[j].findAll("tr")
+            if len(tr) >= 2:
+                result += " -" + material_get_method[j-5] + "\n"
+                for i in range(1, len(tr)):
+                    td = tr[i].findAll("td")
+                    if td[0].find("br") is not None:
+                        td[0].find("br").decompose()
+                    print(td[0].get_text())
+                    target = td[0].get_text().strip().split("\n")
+                    if len(target) == 1:
+                        result += "  --" + target[0] + "\n"
+                    else:
+                        result += "  --" + target[0] + "(" + target[1] + ")\n"
+                    result += "   ---下位\n"
+                    for t in td[1].findAll("a", {"class" : "info"}):
+                        result += "      " + t.get_text().strip() + "\n"
+                    result += "   ---上位\n"
+                    for t in td[2].findAll("a", {"class" : "info"}):
+                        result += "      " + t.get_text().strip() + "\n"
+    elif size == 0:
+        # TODO big moster details query
+        result += "功能尚未完成QQ"
     
     return result
 
